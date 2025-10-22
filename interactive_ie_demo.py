@@ -10,7 +10,7 @@ import sys
 
 # Ollama configuration
 OLLAMA_API = "http://localhost:11434/api/chat"
-MODEL_NAME = "jankalo/phi4-ie"
+MODEL_NAME = "jckalo/phi4-ie"
 
 # Hardcoded schemas from the existing input files
 ENTITY_TYPES = [

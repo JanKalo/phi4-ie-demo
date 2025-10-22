@@ -37,7 +37,7 @@ curl -fsSL https://ollama.com/install.sh | sh
 This downloads the quantized model (8.3GB):
 
 ```bash
-ollama pull jankalo/phi4-ie
+ollama pull jckalo/phi4-ie
 ```
 
 ### 3. Install Python Dependency
@@ -147,7 +147,7 @@ phi4-ie-demo/
 
 Make sure you've pulled the model:
 ```bash
-ollama pull jankalo/phi4-ie
+ollama pull jckalo/phi4-ie
 ```
 
 ### "Cannot connect to Ollama" error
