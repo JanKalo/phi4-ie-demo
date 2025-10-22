@@ -1,0 +1,25 @@
+# Modelfile for phi4-ie (Information Extraction model)
+# Based on FinaPolat/phi4_adaptable_IE
+
+FROM ./models/phi4_ie_q4_k_m.gguf
+
+# System message for Information Extraction
+SYSTEM """You are a helpful AI assistant specializing in Information Extraction (IE) tasks such as Named Entity Recognition (NER) and Relation Extraction (RE). Analyze the provided text and extract the requested information in strict JSON format."""
+
+# Template: ChatML format (model uses <|im_start|> and <|im_end|> tokens)
+TEMPLATE """<|im_start|>system
+{{ .System }}<|im_end|>
+<|im_start|>user
+{{ .Prompt }}<|im_end|>
+<|im_start|>assistant
+"""
+
+# Parameters optimized for IE tasks
+PARAMETER num_ctx 16384
+PARAMETER temperature 0.001
+PARAMETER top_p 0.9
+PARAMETER top_k 40
+PARAMETER repeat_penalty 1.1
+PARAMETER num_predict 8192
+PARAMETER stop "<|im_end|>"
+PARAMETER stop "<|endoftext|>"
