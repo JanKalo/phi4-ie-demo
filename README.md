@@ -66,56 +66,51 @@ python interactive_ie_demo.py --schema schema_business.json
 python interactive_ie_demo.py --schema schema_academic.json
 ```
 
-### Example Session
+### Example: Schema Switching Demo
 
+The same text extracts **different information** depending on the schema.
+
+**Input Text:**
 ```
-📝 Enter text:
-Apple Inc. acquired Beats Electronics in 2014 for $3 billion.
-The company was founded by Dr. Dre and Jimmy Iovine.
+Dr. Sarah Johnson at Stanford University published a paper on AI funded by the National Science Foundation.
 ###
 ```
 
+#### With Business Schema:
+```bash
+python interactive_ie_demo.py --schema schema_business.json
+```
+
+**Entities Extracted:**
+- Dr. Sarah Johnson → `person`
+- Stanford University → `institution`
+- Artificial intelligence → `topic`
+- National Science Foundation → `funding_source`
+
+**Relations & Triples:**
+- (AI, funded_by, National Science Foundation)
+- (Stanford University, has_member, Dr. Sarah Johnson)
+- (AI, published_in, "Journal of Artificial Intelligence")
+
+#### With Academic Schema:
+```bash
+python interactive_ie_demo.py --schema schema_academic.json
+```
+
+**Entities Extracted:**
+- Sarah Johnson (scientist) → `researcher`
+- Stanford University → `institution`
+- National Science Foundation → `funding_agency`
+- Artificial intelligence → `research_field`
+
+**Relations & Triples:**
+- (Dr. Sarah Johnson, affiliated_with, Stanford University)
+- (AI, funded_by, National Science Foundation)
+- (Dr. Sarah Johnson, published_in, "Artificial Intelligence")
+
+**Key Difference:** Business schema sees organizational membership (`has_member`), while academic schema sees research affiliation (`affiliated_with`). Same text, different semantic interpretation!
+
 Type `###` on a new line when done, or `quit` to exit.
-
-### Schema Switching Demo
-
-The same text extracts different information depending on the schema:
-
-**Example Text:**
-> Dr. Sarah Johnson at Stanford University published a paper on AI funded by the National Science Foundation.
-
-**With Business Schema:**
-- Entities: `person`, `institution`, `topic`, `funding_source`
-- Relations: `has_member`, `funded_by`
-
-**With Academic Schema:**
-- Entities: `researcher`, `university`, `research_field`, `funding_agency`
-- Relations: `affiliated_with`, `funded_by`, `published_in`
-
-This demonstrates how schemas shape the semantic interpretation!
-
-### Example Output
-
-The model will extract:
-
-**Entities:**
-- Apple Inc. (company)
-- Beats Electronics (company)
-- 2014 (year)
-- $3 billion (financial_metric)
-- Dr. Dre (person)
-- Jimmy Iovine (person)
-
-**Relations:**
-- acquired
-- founded_by
-
-**Triples:**
-- (Apple Inc., acquired, Beats Electronics)
-- (Apple Inc., had_revenue_of, $3 billion)
-- (Beats Electronics, founded_by, Dr. Dre)
-- (Beats Electronics, founded_by, Jimmy Iovine)
-- (acquisition, occurred_in_year, 2014)
 
 ## Performance Notes
 
