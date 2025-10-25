@@ -7,35 +7,31 @@ Text → NER → RE → Triples (No disambiguation, completely local)
 import json
 import requests
 import sys
+import argparse
+from pathlib import Path
 
 # Ollama configuration
 OLLAMA_API = "http://localhost:11434/api/chat"
 MODEL_NAME = "jckalo/phi4-ie"
 
-# Hardcoded schemas from the existing input files
-ENTITY_TYPES = [
-    "company", "product", "service", "industry", "brand", "country", "location",
-    "organization", "person", "founder", "position", "event", "action",
-    "founding", "accusition", "merger", "partnership", "expansion",
-    "restructuring", "divestment", "sale", "bankruptcy", "financial_metric",
-    "business_concept", "revenue", "profit", "loss", "investment", "funding",
-    "market_share", "competition", "market_trend", "regulation", "innovation",
-    "sustainability", "corporate_social_responsibility", "award", "date/time",
-    "year", "period"
-]
 
-RELATIONS = [
-    "part_of", "parent_company_of", "subsidiary_of", "acquired", "divested",
-    "owns_brand", "holds_stake_in", "spun_off", "formed_from", "founded_by",
-    "has_CEO", "manufactures", "develops", "produces", "sells", "has_product_line",
-    "is_a_type_of", "is_brand_of", "features_technology", "uses_material",
-    "launched_product", "had_revenue_of", "had_profit_of", "in_year",
-    "market_value_of", "is_publicly_traded", "listed_on_exchange",
-    "experienced_growth", "occurred_in_year", "occurred_on_date", "resulted_in",
-    "preceded", "followed_by", "marked_milestone", "influenced_by", "led_to",
-    "was_a_response_to", "has_trademark", "uses_logo", "acquired_trademark_from",
-    "is_known_for", "launched_campaign"
-]
+def load_schema(schema_path):
+    """Load schema from JSON file"""
+    try:
+        with open(schema_path, 'r', encoding='utf-8') as f:
+            schema = json.load(f)
+
+        if 'entity_types' not in schema or 'relations' not in schema:
+            print(f"❌ Error: Schema file must contain 'entity_types' and 'relations'")
+            sys.exit(1)
+
+        return schema
+    except FileNotFoundError:
+        print(f"❌ Error: Schema file not found: {schema_path}")
+        sys.exit(1)
+    except json.JSONDecodeError as e:
+        print(f"❌ Error: Invalid JSON in schema file: {e}")
+        sys.exit(1)
 
 # Prompt template
 PROMPT_TEMPLATE = """Information Extraction is the process of automatically identifying and extracting structured information from unstructured text data. The goal is to transform raw text into meaningful data that can be easily analyzed and used in various applications. Named Entity Recognition (NER) and Relation Extraction are two common tasks in Information Extraction.
@@ -84,7 +80,7 @@ def query_ollama(prompt):
         return None
 
 
-def extract_entities(text):
+def extract_entities(text, schema):
     """Extract entities from text using NER"""
     example = {
         "text": "Adidas AG is a German multinational corporation, founded and headquartered in Herzogenaurach, Germany, that designs and manufactures shoes, clothing and accessories.",
@@ -102,7 +98,7 @@ def extract_entities(text):
     prompt = PROMPT_TEMPLATE.format(
         task="NER: Named Entity Recognition",
         example=json.dumps(example, indent=2),
-        schema=json.dumps(ENTITY_TYPES),
+        schema=json.dumps(schema['entity_types']),
         inputs=text,
         output_format='[["Entity", "Type"], ...]'
     )
@@ -120,7 +116,7 @@ def extract_entities(text):
     return []
 
 
-def extract_relations(text):
+def extract_relations(text, schema):
     """Extract relations from text using RE"""
     example = {
         "text": "Adidas AG is a German multinational corporation, founded and headquartered in Herzogenaurach, Germany.",
@@ -131,7 +127,7 @@ def extract_relations(text):
     }
 
     # Convert relations list to dict format for the prompt
-    relations_dict = [{"relation": r} for r in RELATIONS]
+    relations_dict = [{"relation": r} for r in schema['relations']]
 
     prompt = PROMPT_TEMPLATE.format(
         task="RE: Relation Extraction",
@@ -232,11 +228,37 @@ def check_ollama():
 
 def main():
     """Main interactive loop"""
+    # Parse command line arguments
+    parser = argparse.ArgumentParser(
+        description='Interactive Information Extraction Demo using Ollama',
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+Examples:
+  python interactive_ie_demo.py --schema schema_business.json
+  python interactive_ie_demo.py --schema schema_academic.json
+        """
+    )
+    parser.add_argument(
+        '--schema',
+        type=str,
+        required=True,
+        help='Path to schema JSON file (e.g., schema_business.json)'
+    )
+    args = parser.parse_args()
+
+    # Load schema
+    schema = load_schema(args.schema)
+
     print("="*80)
     print(" "*20 + "📝 Interactive IE Demo - Ollama")
     print("="*80)
     print(f"\nModel: {MODEL_NAME}")
-    print("Task: Extract entities and relations from text")
+    print(f"Schema: {schema.get('name', 'Custom Schema')}")
+    if 'description' in schema:
+        print(f"Description: {schema['description']}")
+    print(f"Entity types: {len(schema['entity_types'])}")
+    print(f"Relations: {len(schema['relations'])}")
+    print("\nTask: Extract entities and relations from text")
     print("No disambiguation - completely local!\n")
 
     check_ollama()
@@ -269,8 +291,8 @@ def main():
             continue
 
         # Extract entities and relations
-        entities = extract_entities(text)
-        relations = extract_relations(text)
+        entities = extract_entities(text, schema)
+        relations = extract_relations(text, schema)
 
         # Display results
         display_results(text, entities, relations)

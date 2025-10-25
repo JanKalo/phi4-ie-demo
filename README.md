@@ -4,11 +4,12 @@ Interactive CLI demo for extracting entities, relations, and knowledge graph tri
 
 ## Features
 
-- **Named Entity Recognition (NER)**: Extract 40+ business entity types (companies, products, people, events, financial metrics, etc.)
+- **Named Entity Recognition (NER)**: Extract entities from text based on custom schemas
 - **Relation Extraction (RE)**: Identify relationships between entities
 - **Triple Generation**: Output structured knowledge graph triples
 - **Completely Local**: No external API calls, runs 100% on your machine
-- **Semi-Closed IE**: Uses hardcoded business domain schemas
+- **Schema-Driven IE**: Flexible extraction using interchangeable JSON schemas
+- **Domain Switching**: Same text, different semantic extractions by changing schemas
 
 ## Prerequisites
 
@@ -55,10 +56,14 @@ cd phi4-ie-demo
 
 ## Usage
 
-Run the interactive demo:
+Run the interactive demo with a schema:
 
 ```bash
-python interactive_ie_demo.py
+# Business domain extraction
+python interactive_ie_demo.py --schema schema_business.json
+
+# Academic domain extraction
+python interactive_ie_demo.py --schema schema_academic.json
 ```
 
 ### Example Session
@@ -71,6 +76,23 @@ The company was founded by Dr. Dre and Jimmy Iovine.
 ```
 
 Type `###` on a new line when done, or `quit` to exit.
+
+### Schema Switching Demo
+
+The same text extracts different information depending on the schema:
+
+**Example Text:**
+> Dr. Sarah Johnson at Stanford University published a paper on AI funded by the National Science Foundation.
+
+**With Business Schema:**
+- Entities: `person`, `institution`, `topic`, `funding_source`
+- Relations: `has_member`, `funded_by`
+
+**With Academic Schema:**
+- Entities: `researcher`, `university`, `research_field`, `funding_agency`
+- Relations: `affiliated_with`, `funded_by`, `published_in`
+
+This demonstrates how schemas shape the semantic interpretation!
 
 ### Example Output
 
@@ -123,13 +145,30 @@ For production use, consider:
 - Using a smaller quantized version (contact maintainer)
 - Deploying to a dedicated inference server
 
-## Supported Entity Types
+## Included Schemas
 
-company, product, service, industry, brand, country, location, organization, person, founder, position, event, action, founding, acquisition, merger, partnership, expansion, restructuring, divestment, sale, bankruptcy, financial_metric, business_concept, revenue, profit, loss, investment, funding, market_share, competition, market_trend, regulation, innovation, sustainability, corporate_social_responsibility, award, date/time, year, period
+### Business Schema (`schema_business.json`)
+Extracts corporate and commercial information:
+- **40 entity types**: company, product, service, industry, brand, financial metrics, people, locations, events, etc.
+- **42 relations**: acquired, founded_by, owns_brand, has_CEO, manufactures, had_revenue_of, etc.
 
-## Supported Relations
+### Academic Schema (`schema_academic.json`)
+Extracts research and scholarly information:
+- **44 entity types**: researcher, professor, university, paper, journal, conference, grant, funding_agency, etc.
+- **46 relations**: affiliated_with, authored, published_in, cited, funded_by, collaborated_with, etc.
 
-part_of, parent_company_of, subsidiary_of, acquired, divested, owns_brand, holds_stake_in, spun_off, formed_from, founded_by, has_CEO, manufactures, develops, produces, sells, has_product_line, is_a_type_of, is_brand_of, features_technology, uses_material, launched_product, had_revenue_of, had_profit_of, in_year, market_value_of, is_publicly_traded, listed_on_exchange, experienced_growth, occurred_in_year, occurred_on_date, resulted_in, preceded, followed_by, marked_milestone, influenced_by, led_to, was_a_response_to, has_trademark, uses_logo, acquired_trademark_from, is_known_for, launched_campaign
+### Custom Schemas
+
+You can create your own schema JSON files! Format:
+
+```json
+{
+  "name": "Your Schema Name",
+  "description": "What this schema extracts",
+  "entity_types": ["type1", "type2", ...],
+  "relations": ["relation1", "relation2", ...]
+}
+```
 
 ## Project Structure
 
@@ -137,6 +176,8 @@ part_of, parent_company_of, subsidiary_of, acquired, divested, owns_brand, holds
 phi4-ie-demo/
 ├── README.md                    # This file
 ├── interactive_ie_demo.py       # Main demo script
+├── schema_business.json         # Business domain schema
+├── schema_academic.json         # Academic domain schema
 ├── Modelfile                    # (Reference) Ollama model config
 └── convert_and_quantize.sh      # (Advanced) Convert HF model to GGUF
 ```
