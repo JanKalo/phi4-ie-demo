@@ -210,10 +210,10 @@ def check_ollama():
         if MODEL_NAME not in models:
             print(f"❌ Error: Model '{MODEL_NAME}' not found in Ollama")
             print(f"\nAvailable models: {models}")
-            print(f"\nPlease create the model first:")
-            print(f"  1. Wait for model download to complete")
-            print(f"  2. Run: ./convert_and_quantize.sh")
-            print(f"  3. Run: ollama create {MODEL_NAME} -f Modelfile")
+            print(f"\nPull the model:")
+            print(f"  ollama pull {MODEL_NAME}")
+            print(f"\nOr build locally from this repo's Modelfile:")
+            print(f"  ollama create {MODEL_NAME} -f Modelfile")
             sys.exit(1)
 
         print(f"✅ Ollama is running with model: {MODEL_NAME}\n")

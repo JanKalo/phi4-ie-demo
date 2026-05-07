@@ -1,7 +1,7 @@
 # Modelfile for phi4-ie (Information Extraction model)
-# Based on FinaPolat/phi4_adaptable_IE
+# Based on FinaPolat/phi4_adaptableIE_v2
 
-FROM ./models/phi4_ie_q4_k_m.gguf
+FROM hf.co/FinaPolat/phi4_adaptableIE_v2-gguf:Q4_K_M
 
 # System message for Information Extraction
 SYSTEM """You are a helpful AI assistant specializing in Information Extraction (IE) tasks such as Named Entity Recognition (NER) and Relation Extraction (RE). Analyze the provided text and extract the requested information in strict JSON format."""
